@@ -1,0 +1,58 @@
+<mat-toolbar color="primary">
+  <span color="primary" class="homeIcon" (click)="opened=!opened">
+    <mat-icon >menu</mat-icon>
+  </span>
+  <a routerLink="/">Aquam</a>
+  
+  <span class="fill-remaining-space"></span>
+  <!-- <a routerLink="/admin" routerLinkActive="active" *ngIf="auth.loggedIn | async">
+    <button mat-button>Admin</button>
+  </a> -->
+  <img class="image-profile" src="../../../assets/generic_profile.png" alt="">    
+  <button mat-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+    {{userData.Usuario}}  
+    <mat-icon>more_vert</mat-icon>
+  </button>
+  <mat-menu #menu="matMenu">
+    <button routerLink="/profile" mat-menu-item>
+      <mat-icon>person</mat-icon>
+      <span>Mi perfil</span>
+    </button>
+    <button (click)="onLogout()" mat-menu-item>
+      <mat-icon>exit_to_app</mat-icon>
+      <span>LogOut</span>
+    </button>
+  </mat-menu>
+  
+  
+    
+
+</mat-toolbar>
+<mat-sidenav-container>
+  <mat-sidenav #sideNav [(opened)]="opened" mode="side">
+       <mat-nav-list>
+        <a mat-list-item routerLink="/delivery" (click)="opened=!opened">
+          <mat-icon>motorcycle</mat-icon>Delivery
+        </a>
+        <a mat-list-item routerLink="/deposito" (click)="opened=!opened">
+          <mat-icon>local_shipping</mat-icon>Depósitos
+        </a>
+        <mat-divider></mat-divider>
+        <a mat-list-item routerLink="/clientes" (click)="opened=!opened">
+          <mat-icon>person_add</mat-icon>Nuevo Cliente
+        </a>
+        <a mat-list-item routerLink="/movimientos" (click)="opened=!opened">
+          <mat-icon>attach_money</mat-icon>Mov de Dinero
+        </a>
+        
+      </mat-nav-list>
+      
+
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div class="container">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+  
+</mat-sidenav-container>

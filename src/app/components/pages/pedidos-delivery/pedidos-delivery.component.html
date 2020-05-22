@@ -1,0 +1,82 @@
+<div class="container">
+  <mat-card class="delivery-card">
+    <mat-card-header>
+      <mat-card-title>Delivery </mat-card-title>
+      <mat-card-subtitle>Registra nuevos pedidos de delivery</mat-card-subtitle>
+    </mat-card-header>
+  
+    <mat-card-content>
+      <form [formGroup]="PedidoForm"> 
+
+        <mat-card>
+          <mat-card-content>
+            <!-- seleccionar cliente -->
+            <mat-form-field style="width:80%">
+              <mat-label>Selecciona al Cliente</mat-label>
+              <mat-select formControlName="IdCliente">
+                <mat-option *ngFor="let cliente of Clientes" [value]="cliente.Id" >
+                  {{cliente.Nombre}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <button mat-icon-button color="primary" (click)="onNuevoCliente()">
+              <mat-icon style="margin-left:10px">person_add</mat-icon>
+            </button>
+
+            <!-- precio de venta -->
+            <mat-form-field>
+              <mat-label>Precio Venta</mat-label>
+              <mat-select formControlName="Precio">
+                <mat-option [value]="2.00" > S/ 2.00 </mat-option>
+                <mat-option [value]="3.00" > S/ 3.00 </mat-option>
+                <mat-option [value]="3.50" > S/ 3.50 </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Vendidos -->
+            <mat-form-field>
+              <mat-label>Bot. Vendidos</mat-label>
+              <mat-select formControlName="BotVendidos">
+                <mat-option *ngFor="let bot of Botellones" [value]="bot.Cant" >
+                {{bot.Text}}
+                </mat-option>
+              </mat-select>   
+            </mat-form-field>
+            
+            <!--  botellones nuevos prestados -->
+            <mat-form-field>
+              <mat-label>Bot. Nuevos Prest.</mat-label>
+              <mat-select formControlName="BotNewPrestado">
+                <mat-option *ngFor="let bot of Botellones" [value]="bot.Cant" >
+                {{bot.Text}}
+                </mat-option>
+              </mat-select>   
+            </mat-form-field>
+
+            <!-- botellones viejos prestados -->
+            <mat-form-field>
+              <mat-label>Bot. Viejos Prest.</mat-label>
+              <mat-select formControlName="BotOldPrestado">
+                <mat-option *ngFor="let bot of Botellones" [value]="bot.Cant" >
+                {{bot.Text}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>  
+            <mat-form-field>
+              <mat-label>Fecha</mat-label>
+              <input  matInput [matDatepicker]="picker" formControlName="Fecha">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+            <mat-checkbox [(ngModel)]="Cancelado" [labelPosition]="'before'" [ngModelOptions]="{standalone: true}">Pago Efectivo</mat-checkbox>
+            
+          </mat-card-content>
+          <mat-card-footer>
+              <button mat-raised-button color="primary"[disabled]="!PedidoForm.valid" (click)="onRegistrarPedido(PedidoForm.value)">Registrar</button>
+              <button mat-raised-button color="warn" routerLink="/home" >Cancelar</button>
+          </mat-card-footer>
+        </mat-card>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

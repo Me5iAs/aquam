@@ -1,0 +1,16 @@
+<div class="container">
+
+<mat-card class="option-card" *ngFor="let op of Opciones">
+    <mat-card-header>
+        <mat-card-title>{{op.Title}} </mat-card-title>
+        <mat-card-subtitle>{{op.Subtitle}}</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+        <a [routerLink]="['/',op.Link]" >
+            <img matCardImage src="../../../../assets/{{op.Image}}">
+        </a>
+    </mat-card-content>
+</mat-card>
+
+</div>

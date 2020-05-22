@@ -1,0 +1,18 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      Buscar Cliente
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <g-mapa  
+      (MarcadoresChange) = "onMarcadores($event)" 
+      [Alto] ="350"
+      [Multimarcadores]="true" 
+      [Marcadores]="Marcadores" 
+    ></g-mapa>
+  </mat-card-content>
+</mat-card>
+
+
+

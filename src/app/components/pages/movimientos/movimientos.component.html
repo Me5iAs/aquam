@@ -1,0 +1,72 @@
+<div class="container">
+  <mat-card class="delivery-card">
+    <mat-card-header>
+      <mat-card-title>Otros Movimientos económicos </mat-card-title>
+      <mat-card-subtitle>registra otros ingresos y egresos asociados al negocio.</mat-card-subtitle>
+    </mat-card-header>
+  
+    <mat-card-content>
+      
+        <mat-card>
+          <mat-card-content>
+            <mat-form-field style="width: 85%">
+              <mat-label>Filter</mat-label>
+              <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ium">
+            </mat-form-field>
+            <button mat-icon-button (click)="onModalMovimiento(movb,'Nuevo')" style="float:right" >
+              <mat-icon style='margin-right:8px'>add_circle_outline</mat-icon>
+            </button>
+
+            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
+              <!-- ['Fecha', 'Usuario', 'Categoria', 'Montos','Acciones']; -->
+              <!-- Fecha Column -->
+              <ng-container matColumnDef="Fecha">
+                <th mat-header-cell *matHeaderCellDef  mat-sort-header> Fecha </th>
+                <td mat-cell *matCellDef="let element" >
+                  <p [ngClass]="{'verde': element.Tipo=='Ingresos', 'rojo':element.Tipo=='Gastos' }"> [{{element.Fecha}}] - {{element.Tipo}}</p>  
+                  <p>-{{element.Categoria}} </p>  
+                  
+                  </td>
+              </ng-container>
+            
+              <ng-container matColumnDef="Usuario">
+                <th mat-header-cell *matHeaderCellDef class="no_mobile"> Usuario </th>
+                <td mat-cell *matCellDef="let element" class="no_mobile"> {{element.Usuario}} </td>
+              </ng-container>
+            
+              <!-- Weight Column -->
+              <ng-container matColumnDef="Categoria">
+                <th mat-header-cell *matHeaderCellDef class="no_mobile"> Categoría </th>
+                <td mat-cell *matCellDef="let element" class="no_mobile"> {{element.Categoria}}</td>
+              </ng-container>
+
+              <!-- Weight Column -->
+              <ng-container matColumnDef="Monto">
+                <th mat-header-cell *matHeaderCellDef > Monto </th>
+                <td mat-cell *matCellDef="let element" style="text-align: right"  >{{element.Monto}}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="Acciones">
+                <th mat-header-cell *matHeaderCellDef class="celda"> Opc </th>
+                <td mat-cell *matCellDef="let element" class="celda"> 
+                  <button mat-icon-button>
+                    <mat-icon matTooltip="ver información del cliente" (click)="onModalMovimiento(element, 'Info')" >info</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+            
+              <!-- Symbol Column -->
+              
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+          </mat-card-content>
+          <mat-card-footer>
+              <!-- <button mat-raised-button color="primary"[disabled]="!PedidoForm.valid" (click)="onRegistrarPedido(PedidoForm.value)">Registrar</button>
+              <button mat-raised-button color="warn" routerLink="/home" >Cancelar</button> -->
+          </mat-card-footer>
+        </mat-card>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,115 @@
+<div class="container">
+
+  <!-- Modo lista -->
+
+  <mat-card class="delivery-card" *ngIf="Modo.Estado==0">
+    <mat-card-header>
+      <mat-card-title>Administrar Clientes </mat-card-title>
+      <mat-card-subtitle>Desde aqui podrás registrar y administrar la información de los clientes y contratos.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content >
+        <mat-card>
+          <mat-card-content>
+            <mat-form-field style="width: 85%">
+              <mat-label>Filter</mat-label>
+              <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ium">
+            </mat-form-field>
+            <button mat-icon-button (click)="onModalCliente(cliN,'Nuevo')" style="float:right" >
+                <mat-icon style='margin-right:8px'>person_add</mat-icon>
+              </button>
+
+            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
+                    
+              <!-- Name Column -->
+              <ng-container matColumnDef="Nombre">
+                <th mat-header-cell *matHeaderCellDef  mat-sort-header> Cliente </th>
+                <td mat-cell *matCellDef="let element"> {{element.Nombre}} </td>
+              </ng-container>
+            
+              <ng-container matColumnDef="Telefono">
+                <th mat-header-cell *matHeaderCellDef class="no_mobile"> Telefono </th>
+                <td mat-cell *matCellDef="let element" class="no_mobile"> {{element.Telefono}} </td>
+              </ng-container>
+            
+              <!-- Weight Column -->
+              <ng-container matColumnDef="Direccion">
+                <th mat-header-cell *matHeaderCellDef class="no_mobile"> Direccion </th>
+                <td mat-cell *matCellDef="let element" class="no_mobile"> {{element.Direccion}} - Ref {{element.Referencia}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="Acciones">
+                <th mat-header-cell *matHeaderCellDef class="celda"> Opciones </th>
+                <td mat-cell *matCellDef="let element" class="celda"> 
+                  <button mat-icon-button>
+                    <mat-icon matTooltip="ver información del cliente" (click)="onModalCliente(element, 'Info')" >info</mat-icon>
+                  </button>
+                  <button mat-icon-button>
+                    <mat-icon matTooltip="Editar información del cliente" (click)="onModalCliente(element, 'Editar')" >edit</mat-icon>
+                  </button>  
+                  <button mat-icon-button >
+                    <mat-icon matTooltip="Eliminar al cliente" (click)="onModalCliente(element, 'Eliminar')">highlight_off</mat-icon>
+                  </button>  
+                </td>
+              </ng-container>  
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+          </mat-card-content>
+          <mat-card-footer>
+          </mat-card-footer>
+        </mat-card>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- modo nuevo cliente -->
+  <mat-card class="delivery-card" *ngIf="Modo.Estado==1">
+      <mat-card-header>
+        <mat-card-title>Nuevo Clientes </mat-card-title>
+        <mat-card-subtitle>Desde aqui podrás registrar un nuevo cliente.</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content >
+          <form [formGroup]="ClienteForm"> 
+            <mat-form-field>
+                <input type="text" matInput placeholder="Nombre" formControlName="Nombre" >
+            </mat-form-field>
+
+            <mat-form-field>
+                <input type="text" matInput placeholder="DNI" formControlName="DNI" >
+            </mat-form-field>
+
+            <mat-form-field>
+                <input type="text" matInput placeholder="RUC" formControlName="RUC" >
+            </mat-form-field>
+
+            <div class="button-row">
+              <label class="custom-file-upload">
+                <input type="file" formControlName="Foto" accept=".gif.,.jpg,.png" (change)="previewImage($event); onFileChange($event)" >
+                <mat-icon>add_a_photo</mat-icon>
+                Subir foto de la Fachada
+              </label>
+              <img [src]="imageUrl" style="max-width: 100%" *ngIf="imageUrl" />
+            </div>   
+
+            <label class="custom-file-upload" style="margin-top:10px; cursor:default">
+              <mat-icon>map</mat-icon>
+              Marque la dirección del cliente:
+            </label>
+            <g-mapa  
+              (MarcadoresChange) = "onMarcadores($event)" 
+              [Alto] ="350"
+              [Multimarcadores]="false" 
+              [Marcadores]="Marcadores" 
+            ></g-mapa>
+           
+            </form>
+
+      </mat-card-content>
+      <mat-card-footer>
+          <button mat-raised-button color="primary"[disabled]="!ClienteForm.valid" (click)="onRegistrarCliente(ClienteForm.value)">Registrar</button>
+          <button mat-raised-button color="warn" routerLink="/home" >Cancelar</button>
+      </mat-card-footer>
+    </mat-card>
+
+
+</div>

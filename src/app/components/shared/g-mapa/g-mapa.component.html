@@ -1,0 +1,28 @@
+<google-map
+  [height]="Alto"
+  [width]="'100%'"
+  [zoom]="zoom"
+  [center]="center"
+  [options]="options"
+  (mapClick)="click($event)"
+>
+  
+  <map-marker
+    #markerElem
+    *ngFor="let marker of markers"
+    [position]="marker.position"
+    [label]="marker.label"
+    [title]="marker.title"
+    [options]="marker.options"
+    (mapMouseover)="mousein(markerElem, marker)"
+    (mapMouseout) ="mouseout()"
+    (mapClick) ="mobileclick(markerElem, marker)"
+    
+  >
+  </map-marker>
+
+  <map-info-window>
+    <span style="display:block"><b> {{ Direccion }}</b></span>
+    <span> {{Referencia}} </span>
+  </map-info-window>
+</google-map>

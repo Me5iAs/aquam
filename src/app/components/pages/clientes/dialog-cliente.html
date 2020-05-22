@@ -1,0 +1,29 @@
+<!-- "Info"|"Editar"|"Eliminar"|"Nuevo" -->
+<h1 mat-dialog-title *ngIf="dataCliente.Accion=='Info'">Información del Cliente</h1>
+<h1 mat-dialog-title *ngIf="dataCliente.Accion=='Editar'">Actualizar Datos de Cliente</h1>
+<h1 mat-dialog-title *ngIf="dataCliente.Accion=='Eliminar'">Eliminar Cliente</h1>
+<h1 mat-dialog-title *ngIf="dataCliente.Accion=='Nuevo'">Nuevo Cliente</h1>
+<div mat-dialog-content>
+    <form [formGroup]="ClienteForm">
+      <mat-form-field><input [readonly]="dataCliente.Accion=='Info' || dataCliente.Accion=='Eliminar'" type="text" matInput placeholder="Cliente" formControlName="Nombre" ></mat-form-field>
+      <mat-form-field><input [readonly]="dataCliente.Accion=='Info' || dataCliente.Accion=='Eliminar'" type="text" matInput placeholder="Dirección" formControlName="Direccion" ></mat-form-field>
+      <mat-form-field><input [readonly]="dataCliente.Accion=='Info' || dataCliente.Accion=='Eliminar'" type="text" matInput placeholder="Referencia" formControlName="Referencia" ></mat-form-field>
+      <mat-form-field><input [readonly]="dataCliente.Accion=='Info' || dataCliente.Accion=='Eliminar'" type="text" matInput placeholder="Teléfono" formControlName="Telefono" ></mat-form-field>
+      <mat-form-field><input [readonly]="dataCliente.Accion=='Info' || dataCliente.Accion=='Eliminar'" type="text" matInput placeholder="DNI" formControlName="DNI" ></mat-form-field>
+      <mat-form-field><input [readonly]="dataCliente.Accion=='Info' || dataCliente.Accion=='Eliminar'" type="text" matInput placeholder="RUC" formControlName="RUC" ></mat-form-field>
+      <!-- <mat-form-field>
+        <input [disabled]="dataCliente.Accion=='Info' || dataCliente.Accion=='Eliminar'" matInput [matDatepicker]="picker" formControlName="Contrato">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field> -->
+      
+  </form>
+</div>
+<div mat-dialog-actions style="text-align:center">
+  <button mat-raised-button *ngIf="dataCliente.Accion!='Info'" (click)="onCancel()" [mat-dialog-close]="false" color="warn">Cancelar</button>
+  <button mat-raised-button *ngIf="dataCliente.Accion=='Editar'" (click)="onUpdateCliente(ClienteForm.value)" color="primary" [disabled]="!ClienteForm.valid" [mat-dialog-close]="true">Actualizar Cliente</button>
+  <button mat-raised-button *ngIf="dataCliente.Accion=='Eliminar'" (click)="onDelCliente(ClienteForm.value)" color="primary" [mat-dialog-close]="true">Eliminar Cliente</button>
+  <button mat-raised-button *ngIf="dataCliente.Accion=='Nuevo'" (click)="onNewCliente(ClienteForm.value)" color="primary" [mat-dialog-close]="true" [disabled]="!ClienteForm.valid">Registrar Cliente</button>
+  <button mat-raised-button *ngIf="dataCliente.Accion=='Info'" (click)="onCancel()" color="primary" [mat-dialog-close]="false" >Ok!</button>
+</div>
+

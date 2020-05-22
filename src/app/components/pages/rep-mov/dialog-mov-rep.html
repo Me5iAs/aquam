@@ -1,0 +1,40 @@
+<h1 mat-dialog-title>Información del Movimiento</h1>
+
+<div mat-dialog-content>
+  <form [formGroup]="MovimientoForm">
+    <mat-form-field>
+      <mat-label>Fecha</mat-label>
+      <input [readonly]="true" type="text" matInput placeholder="Tipo" formControlName="Fecha" >
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Tipo</mat-label>
+      <input [readonly]="true" type="text" matInput placeholder="Tipo" formControlName="Tipo" >
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Categoria</mat-label>
+      <input [readonly]="true" type="text" matInput placeholder="Tipo" formControlName="Categoria" >
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Detalle</mat-label>
+      <input [readonly]="true" type="text" matInput placeholder="Tipo" formControlName="Detalle" >
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Total</mat-label>
+      <input [readonly]="true" type="text" matInput placeholder="Tipo" formControlName="Total" >
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Tipo pago</mat-label>
+      <input [readonly]="true" type="text" matInput placeholder="Tipo" formControlName="Pago" >
+    </mat-form-field>
+
+  </form>
+</div>
+<div mat-dialog-actions style="justify-content:center">
+  <button mat-raised-button (click)="onCancel()" [mat-dialog-close]="false">Cerrar</button>
+</div>
+

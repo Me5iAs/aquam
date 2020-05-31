@@ -2,7 +2,8 @@ import { Component, OnInit, ViewChild, AfterViewInit, Inject } from '@angular/co
 import {FormGroup, FormControl, Validators} from "@angular/forms";
 import {MatPaginator} from '@angular/material/paginator';
 import Swal from 'sweetalert2'
-import {gQueryService} from "./../../../services/g-query.service";
+import {gQueryService} from "../../../services/g-query.service";
+import {SubirService} from "../../../services/subir.service";
 import {Router} from "@angular/router";
 import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
 import { AppDateAdapter, APP_DATE_FORMATS } from "../../format-datepicker";
@@ -35,6 +36,7 @@ export class ClientesComponent implements OnInit, AfterViewInit {
   public imageUrl;
   public FileData;
   public File;
+  public Cliente;
 
   Marcadores = [];
 
@@ -42,7 +44,11 @@ export class ClientesComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort, {static: true}) sort: MatSort;
 
   public cliN:clienteI;
-  constructor(private gQuery:gQueryService, private router:Router, public dialog: MatDialog) {
+  constructor(
+    private gQuery:gQueryService, 
+    private router:Router, 
+    public dialog: MatDialog, 
+    private enviandoImagen:SubirService) {
     this.FileData = [
       this.File,
       this.ClienteForm.value
@@ -55,6 +61,7 @@ export class ClientesComponent implements OnInit, AfterViewInit {
     Direccion : new FormControl("",[Validators.required]),
     Referencia  : new FormControl("", [Validators.required]),
     Latitud  : new FormControl("" , [Validators.required]),
+    Longitud  : new FormControl("" , [Validators.required]),
     Telefono  : new FormControl("", [Validators.required, Validators.pattern("^[0-9]*$"), Validators.minLength(6)]),
     DNI : new FormControl("", [Validators.pattern("^[0-9]*$"), Validators.minLength(8)]),
     RUC : new FormControl("", [Validators.pattern("^[0-9]*$"), Validators.minLength(11)]),
@@ -65,8 +72,12 @@ export class ClientesComponent implements OnInit, AfterViewInit {
   // ===============
   ngOnInit() {
     // cargar clientes
+    this.CargarClientes();  
+  }
+
+  CargarClientes(){
     this.gQuery
-    .sql("sp_totalclientes_devolver")
+    .sql("sp_clientes_devolver")
     .subscribe(data =>{
       this.dataSource= new MatTableDataSource(<any> data);
       this.dataSource.paginator = this.paginator;
@@ -75,16 +86,19 @@ export class ClientesComponent implements OnInit, AfterViewInit {
 
   }
   ngAfterViewInit(){
-
   }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   // NUEVO CLIENTE
-  // =============
-
+  
     public previewImage(event) {
       const reader = new FileReader();
       const file = event.target.files[0];
@@ -108,167 +122,188 @@ export class ClientesComponent implements OnInit, AfterViewInit {
     }
 
     onMarcadores($event){ 
-      console.log($event);
-    }
 
-    onRegistrarCliente(val){
-      console.log(val);
+      this.ClienteForm.controls["Direccion"].setValue($event[0].label.text);
+      this.ClienteForm.controls["Referencia"].setValue($event[0].title);
+      this.ClienteForm.controls["Latitud"].setValue($event[0].position.lat);
+      this.ClienteForm.controls["Longitud"].setValue($event[0].position.lng);
       
     }
 
-  onModalCliente(cliente:clienteI, pAccion:"Info"|"Editar"|"Eliminar"|"Nuevo"){
-    if(pAccion=="Nuevo"){
+    onRegistrarCliente(data){
+
+      this.gQuery.sql(
+        "sp_cliente_registrar",
+        data.Nombre         + "|" + 
+        data.RUC            + "|" + 
+        data.DNI            + "|" + 
+        data.Direccion      + "|" + 
+        data.Referencia     + "|" + 
+        data.Telefono       + "|" +        
+        data.Latitud        + "|" + 
+        data.Longitud
+        ).subscribe(res =>{
+          if(res[0].Estado==1){
+
+            this.enviandoImagen.postFileImagen(this.File, res[0].Id).subscribe(
+              response => {
+                response = response; 
+                if(response <= 1){
+                  alert("Error subiendo imagen al servidor"); 
+                }else{
+                  this.CargarClientes()
+                  this.Modo = {Estado:0, Detalle:''}
+                }
+              },
+              error => {
+                console.log(error);
+                
+                // alert(<any>error);
+              }
+            )
+
+          }
+          alert(res[0].message);
+        }
+      );
+      
+    }
+  
+    onNewCliente(){
       this.Modo = {Estado:1, Detalle:""}
     }
-    return;
-    if(pAccion =="Nuevo"){
-      cliente = <clienteI> {
-        Id: "",
-        Nombre: "",
-        RUC: "",
-        DNI: "",
-        Direccion: "",
-        Referencia: "",
-        Telefono: "",  
-        Accion: "Nuevo",
-        Contrato:""
-      }  
-    }else{
-      cliente.Accion = pAccion;
-    }
-    
-    // console.log(cliente.Accion);
-    const dialogRef = this.dialog.open(DialogCliente, {
-      data: cliente,
-      width: '300px',
-    });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if(result==true){
-        this.gQuery
-        .sql("sp_totalclientes_devolver")
-        .subscribe(data =>{
-          
-          this.dataSource= new MatTableDataSource(<any> data);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-        });
+  // INFO CLIENTE
+  
+    onInfoCliente(event){
+      this.Cliente = {};
+      this.Modo = {Estado:2, Detalle:""}
+      this.Cliente = {
+        Id: event.Id,
+        DNI : event.DNI,
+        Nombre: event.Nombre,
+        Telefono: event.Telefono,
+        RUC: event.RUC,
+        Direccion: event.Direccion,
+        Referencia: event.Referencia,
+        Img: "http://localhost/imagenes/" + event.Id,
+        Marcador: [
+          {
+            position: {
+              lat : Number(event.Latitud),
+              lng: Number(event.Longitud),
+            },
+            label: {
+              text: event.Direccion,
+            },
+            title: event.Referencia,
+            options: {
+              animation: google.maps.Animation.DROP,
+            },
+          }
+        ]
       }
-      console.log(result);
+
+      console.log(this.Cliente);
       
-    });
+      
+    }
+  
+  // EDITAR CLIENTE
+    onEditCliente(event){
+      this.Modo = {Estado:3, Detalle:""}
+      
+      this.ClienteForm = new FormGroup({
+        Id :  new FormControl(event.Id),
+        Nombre  : new FormControl(event.Nombre, [Validators.required]),
+        Direccion : new FormControl(event.Direccion,[Validators.required]),
+        Referencia  : new FormControl(event.Referencia, [Validators.required]),
+        Latitud  : new FormControl(event.Latitud , [Validators.required]),
+        Longitud  : new FormControl(event.Longitud , [Validators.required]),
+        Telefono  : new FormControl(event.Telefono, [Validators.required, Validators.pattern("^[0-9]*$"), Validators.minLength(6)]),
+        DNI : new FormControl(event.DNI, [Validators.pattern("^[0-9]*$"), Validators.minLength(8)]),
+        RUC : new FormControl(event.RUC, [Validators.pattern("^[0-9]*$"), Validators.minLength(11)]),
+        Foto  : new FormControl(event.RUC, [Validators.required])
+      });
+      this.imageUrl = "http://localhost/imagenes/" + event.Id; 
+      this.Marcadores = [
+        {
+          position: {
+            lat : Number(event.Latitud),
+            lng: Number(event.Longitud),
+          },
+          label: {
+            text: event.Direccion,
+          },
+          title: event.Referencia,
+          options: {
+            animation: google.maps.Animation.DROP,
+          },
+        }
+      ]     
+    }
+
+    onUpdateCliente(data){
+
+      this.gQuery.sql(
+        "sp_cliente_update",
+        data.Id             + "|" + 
+        data.Nombre         + "|" + 
+        data.RUC            + "|" + 
+        data.DNI            + "|" + 
+        data.Direccion      + "|" + 
+        data.Referencia     + "|" + 
+        data.Telefono       + "|" +        
+        data.Latitud        + "|" + 
+        data.Longitud
+        ).subscribe(res =>{
+          if(res[0].Estado==1){
+
+            this.enviandoImagen.postFileImagen(this.File, data.Id).subscribe(
+              response => {
+                response = response; 
+                if(response <= 1){
+                  alert("Error subiendo imagen al servidor"); 
+                }else{
+                  this.CargarClientes()
+                  this.Modo = {Estado:0, Detalle:''}
+                }
+              },
+              error => {
+                console.log(error);
+                
+                // alert(<any>error);
+              }
+            )
+
+          }
+          alert(res[0].message);
+        }
+      );
+      
+    }
+
+  
+  onDelCliente(event){
+    if(!confirm("Esta acción eliminará al cliente, desea continuar")) {
+      return;
+    }
+
+    this.gQuery
+      .sql("sp_cliente_delete",event.Id)
+      .subscribe(res =>{
+        alert("Cliente eliminado con éxito")
+        this.CargarClientes()
+        this.Modo = {Estado:0, Detalle:''}
+      });
+  }  
+
+  onCancelarCliente(){
+    this.Modo = {Estado:0, Detalle:""}
   }
 
+ 
 
  
 }
 
-@Component({
-  selector: 'dialog-cliente',
-  templateUrl: 'dialog-cliente.html',
-  styleUrls: ['./clientes.component.styl'],
-  providers: [
-    {provide: DateAdapter, useClass: AppDateAdapter},
-    {provide: MAT_DATE_FORMATS, useValue: APP_DATE_FORMATS}
-  ]
-})
-
-export class DialogCliente implements OnInit{
-  
-  ngOnInit(): void {
-   
-  }
-
-  constructor(
-    private gQuery: gQueryService,
-    public dialogRef: MatDialogRef<DialogCliente>,
-    @Inject(MAT_DIALOG_DATA) public dataCliente: clienteI) {
-    
-      if(dataCliente.Accion == "Nuevo"){
-        this.ClienteForm = new FormGroup({
-          Nombre: new FormControl("" ,Validators.required),
-          Direccion: new FormControl("", Validators.required),
-          Referencia: new FormControl("", Validators.required),
-          Telefono: new FormControl("", [Validators.required, Validators.pattern("^[0-9]*$"), Validators.minLength(6), Validators.maxLength(9)]),
-          RUC: new FormControl("", [Validators.pattern("^[0-9]*$"), Validators.minLength(11), Validators.maxLength(11) ]),
-          DNI: new FormControl("", [Validators.pattern("^[0-9]*$"), Validators.minLength(8), Validators.minLength(8)]),
-          Contrato: new FormControl(""),
-        });
-      }
-      
-    }
-    
-    ClienteForm = new FormGroup({
-      Nombre: new FormControl(this.dataCliente.Nombre ,Validators.required),
-      Direccion: new FormControl(this.dataCliente.Direccion, Validators.required),
-      Referencia: new FormControl(this.dataCliente.Referencia, Validators.required),
-      Telefono: new FormControl(this.dataCliente.Telefono, [Validators.required, Validators.pattern("^[0-9]*$"), Validators.minLength(6)]),
-      RUC: new FormControl(this.dataCliente.RUC, [Validators.pattern("^[0-9]*$"), Validators.minLength(11)]),
-      DNI: new FormControl(this.dataCliente.DNI, [Validators.pattern("^[0-9]*$"), Validators.minLength(8)]),
-      Contrato: new FormControl(new Date(this.dataCliente.Contrato)),
-    });
-
-
-    onCancel(): void {
-    this.dialogRef.close();
-  }
-
-  onUpdateCliente(data: clienteI){
-    // let sFecha = "";
-    // if(data.Contrato!=""){
-    //   let dFecha = new Date(data.Contrato);
-    //   sFecha = dFecha.toISOString().split('T')[0];  
-    // } 
-    
-    
-    this.gQuery.sql(
-      "sp_cliente_update",
-      this.dataCliente.Id + "|" + 
-      data.Nombre         + "|" + 
-      data.RUC            + "|" + 
-      data.DNI            + "|" + 
-      data.Direccion      + "|" + 
-      data.Referencia     + "|" + 
-      data.Telefono      
-      ).subscribe(res =>{
-        Swal.fire(res[0].message);
-        if(res[0].Estado==1){
-          this.dialogRef.close(true);
-        }
-      });
-  }
-
-  onDelCliente(data: clienteI){
-    this.gQuery.sql(
-      "sp_cliente_delete",
-      this.dataCliente.Id).subscribe(res =>{
-        Swal.fire(res[0].message);
-        this.dialogRef.close(true);
-      });
-  }
-
-  onNewCliente(data:clienteI){
-    // let sFecha = "";
-    // if(data.Contrato!=""){
-    //   let dFecha = new Date(data.Contrato);
-    //   sFecha = dFecha.toISOString().split('T')[0];  
-    // } 
-
-    this.gQuery.sql(
-      "sp_clientes_registrar",
-      data.Nombre         + "|" + 
-      data.RUC            + "|" + 
-      data.DNI            + "|" + 
-      data.Direccion      + "|" + 
-      data.Referencia     + "|" + 
-      data.Telefono       
-      ).subscribe(res =>{
-        Swal.fire(res[0].message);
-        if(res[0].Estado==1){
-          this.dialogRef.close(true);
-        }
-      }
-    );
-  }
-
-}
